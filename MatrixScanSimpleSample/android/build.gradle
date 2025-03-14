@@ -2,12 +2,12 @@
 
 buildscript {
     ext {
-        buildToolsVersion = "33.0.0"
-        minSdkVersion = 23
-        compileSdkVersion = 33
-        targetSdkVersion = 33
-        kotlinVersion = "1.8.22"
-        ndkVersion = "27.0.12077973"
+        buildToolsVersion = "35.0.0"
+        minSdkVersion = 24
+        compileSdkVersion = 35
+        targetSdkVersion = 35
+       
+        ndkVersion = "27.1.12297006"
     }
     repositories {
         google()
@@ -15,19 +15,35 @@ buildscript {
     }
     dependencies {
         classpath "com.android.tools.build:gradle"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin"
         classpath("com.facebook.react:react-native-gradle-plugin")
     }
 }
 
+apply plugin: "com.facebook.react.rootproject"
+
 def custom_config_scripts = [
         "$rootDir/frameworks.gradle",
-        "${rootDir}/../../../../common/frameworks.gradle"
+        "${rootDir}/../../../../../../common/frameworks.gradle"
 ]
+
+static def findM2Directory(String startPath) {
+    File currentPath = new File(startPath).absoluteFile
+
+    while (currentPath.parentFile != null) {  // Check if we are at the root
+        File m2Path = new File(currentPath, '.m2')
+        if (m2Path.isDirectory()) {
+            return m2Path.absolutePath
+        }
+        currentPath = currentPath.parentFile  // Move up one directory
+    }
+
+    return null  // Return null if .m2 is not found
+}
 
 allprojects {
     repositories {
-        maven { url "file://${rootDir}/../../../.m2/repository" }
+        maven { url "file://${findM2Directory(rootDir.path)}/repository" }
     }
     custom_config_scripts.each { location ->
         def file = file(location)
